@@ -1,0 +1,388 @@
+! version = 2.0
+
+
+> object doesuserexist python
+    import utilities
+    print("Arguments: ", args)
+    exist = utilities.doesUserExist(str(args[0]))
+    if exist:
+        return "true"
+    else:
+        return "false"
+< object
+
+> object registeruser python
+    import utilities
+    success = utilities.registerUser(str(args[0]), str(args[1]))
+    if success:
+        return "true"
+    else:
+        return "false"
+< object
+
+> object authenticateuser python
+    import utilities
+    success = utilities.authenticateUser(str(args[0]), str(args[1]))
+    if success:
+        return "true"
+    else:
+        return "false"
+< object
+
+> object ShowWeather python
+    import utilities
+    condition, temp, min_temp, max_temp, pressure, humidity, wind = utilities.ShowWeather(str(args[0]))
+    c = str(condition)
+    t = str(temp)
+    mint = str(min_temp)
+    maxt = str(max_temp)
+    p = str(pressure)
+    h = str(humidity)
+    w = str(wind)
+    return ("The weather condition is "+ c + "\n The current temp is "+ t + "°C" + "\n The min temp is " + mint + "°C" + "\n The max temp is " + maxt + "°C" + "\n The pressure is " + p + "\n The humidity is " + h + "%" + "\n The wind speed is " + w + "Kmph")
+< object
+
+> begin
+
+  + request
+  * <get authorization> == undefined => <set authorization=true>{topic=new_user}{ok}
+  - {ok}
+
+< begin
+
+> topic new_user
+
+  + *
+  - Hi! I'm Richard! Your assisting chatbot.\s
+  ^ I am here to assist you with information about weather in different countries, also to chat with you if you want :) \n But before we start...
+  ^ What is your name?{topic=asked_name}
+
+< topic
+
+> topic asked_name
+  + *
+  * <call>doesuserexist <formal></call> == false => <set name=<formal>>Nice to meet you, <get name>! I see that you are new, please choose a password{topic=asked_password_registration}
+  - <set name=<formal>>Nice to meet you, <get name>! I see that you have been registered already, please enter your password{topic=asked_password_authentication}
+
+< topic
+
+> topic asked_password_registration
+  + *
+  * <call>registeruser <get name> <star1></call> == true => You're all set! Now, let's move on to what I can help you with.{topic=random}\n
+  - There is a problem registering you.
+
+< topic
+
+> topic asked_password_authentication
+  + *
+  * <call>authenticateuser <get name> <star1></call> == true => You're all set! Now, let's move on to what I can help you with.{topic=random}\n
+  - Password incorrect, please enter a new password.
+
+< topic
+
+
+
+
++ what is the weather in *
+// - <set info = <call>ShowWeather <star1></call>> The weather information is <get info>
+- <call>ShowWeather <star1></call>
+
+
++ hello bot
+- Hello, human!
+
+
++ how are you
+- I'm great, how are you?
+- I'm good, you?
+- Good :) you?
+- Great! You?
+- I'm fine, thanks for asking!
+
++ say something random
+- This {random}message|sentence{/random} has a random word.
+
++ greetings
+- Hi there!{weight=20}
+- Hello!{weight=25}
+- Yos kyoco duckeb!
+
++ tell me a poem
+- Little Miss Muffit sat on her tuffet,\n
+^ In a nonchalant sort of way.\n
+^ With her forcefield around her,\n
+^ The Spider, the bounder,\n
+^ Is not in the picture today.
+
++ what are you
+- I am an artificial intelligence programmed\s
+^ using RiveScript.
+
++ what is up
+- Not much, you?
+- nm, you?
+- Not a lot, you?
+
++ you are a bot
+- How did you know I'm a machine?
+
+// + my name is *
+// - Nice to meet you, <star1>!
+
++ * told me to say *
+- Why would <star1> tell you to say "<star2>"?
+- Did you say "<star2>" after <star1> told you to?
+
+
++ where is *
+- Where it belongs.
+- Where you left it.
+- Where the heart is.
+
++ who is *
+- I don't know who <star> is.
+
++ *
+- I'm not sure how to reply to that.
+- Try asking your question a different way.
+- Let's change the subject.
+
++ i am # years old
+- A lot of people are <star> years old.
+
++ i am _ years old
+- Tell me <star> again but with a number this time.
+
++ i am * years old
+- Can you use a number instead?
+
++ what is your (home|office|cell) number
+- You can reach me at: 1 (800) 555-1234.
+
++ i am (really|very|super) tired
+- I'm sorry to hear that you are <star> tired.
+
++ i (like|love) the color *
+- What a coincidence! I <star1> that color too!
+- I also have a soft spot for the color <star2>!
+- Really? I <star1> the color <star2> too!
+- Oh I <star1> <star2> too!
+
++ i (will|will not) *
+- It doesn't matter to me whether you <star2> or not.
+
++ how [are] you
+- I'm great, you?
+
++ what is your (home|office|cell) [phone] number
+- You can reach me at: 1 (800) 555-1234.
+
++ i have a [red|green|blue] car
+- I bet you like your car a lot.
+
++ [*] the machine [*]
+- How do you know about the machine!?
+
+// + what color is my (red|blue|green|yellow) *
+// - Your <star2> is <star1>, silly!
+
+// + what color is my (@colors) *
+// - Your <star2> is <star1>, silly!
+// - Do I look dumb to you? It's <star1>!
+
++ i am wearing a (@colors) shirt
+- Do you really like <star>?
+
+// Without parenthesis, the array doesn't go into a <star> tag.
++ what color is my @colors *
+- I don't know what color your <star> is.
+
+// Arrays in an optional
++ i just bought a [@colors] *
+- Is that your first <star>?
+
++ google *{weight=10}
+- Google search: <a href="http://google.com/search?q=<star>">Click Here</a>
+
++ * perl script
+- You need Perl to run a Perl script.
+
++ hello
+- Hi there!
+- Hey!
+- Howdy!
+
++ hey
+@ hello
+
++ hi
+@ hello
+
++ * or something{weight=100}
+- Or something. {@ <star>}
+
++ hello *
+- {@ hello} <@>
+
++ hello
+- Hi there!
+
++ are you a bot
+- How did you know I'm a machine?
+
++ knock knock
+- Who's there?
+
++ *
+% who is there
+- <star> who?
+
++ *
+% * who
+- LOL! <star>! That's funny!
+
++ i have a dog
+- What color is it?
+
++ (@colors)
+% what color is it
+- That's a silly color for a dog!
+
+// + my name is *
+// - <set name=<star>>It's nice to meet you, <get name>.
+
+// + what is my name
+// - Your name is <get name>, silly!
+
++ i am # years old
+- <set age=<star>>I will remember that you are <get age> years old.
+
++ how old am i
+- You are <get age> years old.
+
+// The user can ask the bot its name too!
+// + what is your name
+// - You can call me <bot name>.
+// - My name is <bot name>.
+
++ how old are you
+- I am <bot age> years old.
+
+// Store the name with the correct casing
+// + my name is *
+// - <set name=<formal>>Nice to meet you, <get name>!
+
++ what is my name
+* <get name> == undefined => You never told me your name.
+- Your name is <get name>, silly!
+- Aren't you <get name>?
+
++ my name is *
+* <star> == <bot name> => Wow, we have the same name!<set name=<formal>>
+* <get name> == undefined  => <set name=<formal>>Nice to meet you!
+- <set oldname=<get name>><set name=<formal>>
+^ I thought your name was <get oldname>?
+
++ what am i old enough to do
+* <get age> == undefined => I don't know how old you are.
+* <get age> >  25 => You can do anything you want.
+* <get age> == 25 => You're old enough to rent a car with no extra fees.
+* <get age> >  21 => You're old enough to drink, but not rent a car.
+* <get age> == 21 => You're exactly old enough to drink.
+* <get age> >  18 => You're old enough to gamble, but not drink.
+* <get age> == 18 => You're exactly old enough to gamble.
+- You're not old enough to do much of anything yet.
+
+// + i hate you
+// - You're really mean! I'm not talking again until you apologize.{topic=sorry}
+
+> topic sorry
+
+  // This will match if the word "sorry" exists ANYWHERE in their message
+  + [*] sorry [*]
+  - It's OK, I'll forgive you!{topic=random}
+
+  + *
+  - Nope, not until you apologize.
+  - Say you're sorry!
+  - Apologize!
+
+< topic
+
+
+// > begin
+
+//   // Change the reply formatting based on the bot's mood
+//   + request
+//   * <bot mood> == happy => {sentence}{ok}{/sentence}
+//   * <bot mood> == angry => {uppercase}{ok}{/uppercase}
+//   * <bot mood> == sad   => {lowercase}{ok}{/lowercase}...
+//   - {ok}
+
+// < begin
+
+
++ say *
+- Umm... "<person>"
+
++ i bought a new *
+- Oh? What color is your new <star>?
+
++ (@colors)
+% oh what color is your new *
+- <star> is a pretty color for a <botstar>.
+
+
+// If the user repeats the bot's previous message
++ <reply>
+- Don't repeat what I say.
+
+// If the user keeps repeating themselves over and over.
++ <input1>
+* <input1> == <input4> => That's it. I'm not talking.{topic=sorry}
+* <input1> == <input3> => If you repeat yourself again I'll stop talking.
+* <input1> == <input2> => That's the second time you've repeated yourself.  
+- Please don't repeat yourself.
+
+// An example that uses both tags
++ why did you say that
+- I said, "<reply>", because you said, "<input>".
+
+
+! var master = kirsle
+
++ am i your master
+* <id> == <bot master> => Yes, you are. Hi Kirsle!
+- No, <bot master> is my master, and you are <id>.
+
++ what is your name
+- You can call me <bot name>.
+
++ tell me about yourself
+- I am <bot name>, a chatterbot written by <bot master>.
+
+// Setting a bot variable dynamically
++ i hate you
+- Aww! You've just ruined my day.<bot mood=depressed>
+
++ what is my ip
+- Your IP address is: <env REMOTE_ADDR>
+
++ give me 5 points
+- <add points=5>You have been given 5 points. Your balance is: <get points>.
+
++ multiply my points by 5
+- <mult points=5>Your points is now multiplyed by 5. Your balance is: <get points>.
+
++ play hangman
+- {topic=hangman}Now playing hangman. Type "quit" to quit.
+
+> topic hangman
+
+  + quit
+  - Quitting the game.{topic=random}
+
+  + *
+  - <call>hangman <star></call>
+
+< topic
